@@ -33,7 +33,7 @@ Rendered to:
 * Common media such as `<img>`, `<figure>`, `<svg>`, `<video>` & `class="media"` are formatted nicely.
 * A separator between media.
 * A spacer between media and text (paragraphs, headings, etc).
-* Customizable via [`@nodestrap/css-config`](https://www.npmjs.com/package/@nodestrap/css-config).
+* Customizable via [`@cssfn/css-config`](https://www.npmjs.com/package/@cssfn/css-config).
 
 ## Installation
 
