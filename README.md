@@ -7,7 +7,7 @@ A common media such as `<img>`, `<figure>`, `<svg>` & `<video>` are formatted to
 ## Preview
 
 ```jsx
-<Content tag='article' theme='primary' size='lg' >
+<Content tag='article' theme='primary' size='lg'>
     <img src='https://picsum.photos/800/400' alt='an image' />
     <img src='https://picsum.photos/800/400' alt='an image' />
     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum harum ab illum nisi est distinctio delectus dolores</p>
@@ -33,6 +33,7 @@ Rendered to:
 * Common media such as `<img>`, `<figure>`, `<svg>`, `<video>` & `class="media"` are formatted nicely.
 * A separator between media.
 * A spacer between media and text (paragraphs, headings, etc).
+* Customizable via [`@nodestrap/css-config`](https://www.npmjs.com/package/@nodestrap/css-config).
 
 ## Installation
 

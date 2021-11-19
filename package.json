@@ -1,6 +1,6 @@
 {
   "name": "@nodestrap/content",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "A generic element for displaying contents such as paragraphs, images, videos, etc.",
   "type": "module",
   "main": "dist/Content.jsx",
