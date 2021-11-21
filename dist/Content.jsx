@@ -579,8 +579,8 @@ export const usesContentVariants = () => {
         ]),
     ]);
 };
-export const usesContent = () => {
-    return composition([
+export const useContentSheet = createUseSheet(() => [
+    mainComposition([
         imports([
             // media:
             usesContentMedia(),
@@ -588,13 +588,6 @@ export const usesContent = () => {
             usesContentLayout(),
             // variants:
             usesContentVariants(),
-        ]),
-    ]);
-};
-export const useContentSheet = createUseSheet(() => [
-    mainComposition([
-        imports([
-            usesContent(),
         ]),
     ]),
 ]);

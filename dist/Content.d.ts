@@ -33,7 +33,6 @@ export declare const usesContentBasicLayout: () => import("@cssfn/cssfn").StyleC
 export declare const usesContentLayout: () => import("@cssfn/cssfn").StyleCollection;
 export declare const usesContentBasicVariants: () => import("@cssfn/cssfn").StyleCollection;
 export declare const usesContentVariants: () => import("@cssfn/cssfn").StyleCollection;
-export declare const usesContent: () => import("@cssfn/cssfn").StyleCollection;
 export declare const useContentSheet: import("@cssfn/types").Factory<import("jss").Classes<"main">>;
 export declare const cssProps: import("@cssfn/css-config").Refs<{
     paddingInline: import("@cssfn/css-types").Cust.Ref;
