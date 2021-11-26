@@ -610,18 +610,16 @@ export function Content(props) {
     // styles:
     const sheet = useContentSheet();
     // jsx:
-    return (<Basic 
-    // other props:
-    {...props} 
-    // variants:
-    mild={props.mild ?? true} 
-    // classes:
-    mainClass={props.mainClass ?? sheet.main}/>);
+    return (React.createElement(Basic, { ...props, 
+        // variants:
+        mild: props.mild ?? true, 
+        // classes:
+        mainClass: props.mainClass ?? sheet.main }));
 }
 export { Content as default };
-export function Article(props) { return <Content {...props} semanticTag='article' semanticRole='article'/>; }
-export function Section(props) { return <Content {...props} semanticTag='section' semanticRole='region'/>; }
-export function Aside(props) { return <Content {...props} semanticTag='aside' semanticRole='complementary'/>; }
+export function Article(props) { return React.createElement(Content, { ...props, semanticTag: 'article', semanticRole: 'article' }); }
+export function Section(props) { return React.createElement(Content, { ...props, semanticTag: 'section', semanticRole: 'region' }); }
+export function Aside(props) { return React.createElement(Content, { ...props, semanticTag: 'aside', semanticRole: 'complementary' }); }
 // mark as Content compatible:
 Article.prototype = Content.prototype;
 Section.prototype = Content.prototype;
