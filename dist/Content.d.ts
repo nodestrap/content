@@ -1,8 +1,16 @@
 import { default as React } from 'react';
+import { SelectorCollection } from '@cssfn/cssfn';
 import { BasicProps } from '@nodestrap/basic';
-export declare const usesMediaFill: () => import("@cssfn/cssfn").StyleCollection;
-export declare const usesContentMediaLayout: () => import("@cssfn/cssfn").StyleCollection;
-export declare const usesContentMedia: () => import("@cssfn/cssfn").StyleCollection;
+export interface ContentChildrenOptions {
+    mediaSelector?: SelectorCollection;
+}
+export declare const usesContentChildrenFill: (options?: ContentChildrenOptions) => import("@cssfn/cssfn").StyleCollection;
+export declare const usesContentChildrenMedia: (options?: ContentChildrenOptions) => import("@cssfn/cssfn").StyleCollection;
+export interface ContentChildrenLinksOptions {
+    linkSelector?: SelectorCollection;
+}
+export declare const usesContentChildrenLinks: (options?: ContentChildrenLinksOptions) => import("@cssfn/cssfn").StyleCollection;
+export declare const usesContentChildren: (options?: (ContentChildrenOptions & ContentChildrenLinksOptions)) => import("@cssfn/cssfn").StyleCollection;
 export declare const usesContentBasicLayout: () => import("@cssfn/cssfn").StyleCollection;
 export declare const usesContentLayout: () => import("@cssfn/cssfn").StyleCollection;
 export declare const usesContentBasicVariants: () => import("@cssfn/cssfn").StyleCollection;
