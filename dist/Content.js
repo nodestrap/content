@@ -24,6 +24,8 @@ usesSizeVariant, expandBorderStroke, usesBorderRadius, expandBorderRadius, expan
 // styles:
 usesBasicLayout, usesBasicVariants, Basic, } from '@nodestrap/basic';
 import { 
+// selectors:
+selectorIsFirstVisibleChild, selectorIsLastVisibleChild, 
 // hooks:
 usesContainer, usesBorderAsContainer, usesBorderAsSeparatorBlock, } from '@nodestrap/container';
 // styles:
@@ -68,13 +70,13 @@ export const usesContentChildrenFill = (options = {}) => {
                     ]),
                 }),
                 variants([
-                    rule(':where(:first-child)', [
+                    rule(selectorIsFirstVisibleChild, [
                         layout({
                             // spacings:
                             marginBlockStart: negativePaddingBlock, // cancel out parent's padding with negative margin
                         }),
                     ]),
-                    rule(':where(:last-child)', [
+                    rule(selectorIsLastVisibleChild, [
                         layout({
                             // spacings:
                             marginBlockEnd: negativePaddingBlock, // cancel out parent's padding with negative margin
