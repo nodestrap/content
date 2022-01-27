@@ -3,11 +3,13 @@ import { default as React, } from 'react'; // base technology of our nodestrap c
 // cssfn:
 import { 
 // compositions:
-composition, mainComposition, imports, 
-// layouts:
-layout, children, nextSiblings, 
+mainComposition, 
+// styles:
+style, imports, 
 // rules:
-variants, rule, } from '@cssfn/cssfn'; // cssfn core
+rule, fallbacks, 
+//combinators:
+children, nextSiblings, } from '@cssfn/cssfn'; // cssfn core
 import { 
 // hooks:
 createUseSheet, } from '@cssfn/react-cssfn'; // cssfn for react
@@ -41,140 +43,121 @@ export const usesContentChildrenFill = (options = {}) => {
     const positivePaddingBlock = containerRefs.paddingBlock;
     const negativePaddingInline = `calc(0px - ${positivePaddingInline})`;
     const negativePaddingBlock = `calc(0px - ${positivePaddingBlock})`;
-    return composition([
-        imports([
+    return style({
+        ...imports([
             // borders:
             usesBorderAsContainer({ itemsSelector: mediaSelector }), // make a nicely rounded corners
         ]),
-        layout({
+        ...style({
             // children:
-            ...children(mediaSelector, [
-                layout({
-                    // sizes:
-                    // span to maximum width including parent's paddings:
-                    boxSizing: 'border-box',
-                    inlineSize: 'fill-available',
-                    fallbacks: {
-                        inlineSize: `calc(100% + (${positivePaddingInline} * 2))`,
-                    },
-                    // spacings:
-                    marginInline: negativePaddingInline,
-                    marginBlockEnd: positivePaddingBlock,
-                    // children:
-                    // make sibling <media> closer (cancel out prev sibling's spacing):
-                    ...nextSiblings(mediaSelector, [
-                        layout({
-                            // spacings:
-                            marginBlockStart: negativePaddingBlock, // cancel out prev sibling's spacing with negative margin
-                        }),
-                    ]),
+            ...children(mediaSelector, {
+                // sizes:
+                // span to maximum width including parent's paddings:
+                boxSizing: 'border-box',
+                inlineSize: 'fill-available',
+                ...fallbacks({
+                    inlineSize: `calc(100% + (${positivePaddingInline} * 2))`,
                 }),
-                variants([
-                    rule(selectorIsFirstVisibleChild, [
-                        layout({
-                            // spacings:
-                            marginBlockStart: negativePaddingBlock, // cancel out parent's padding with negative margin
-                        }),
-                    ]),
-                    rule(selectorIsLastVisibleChild, [
-                        layout({
-                            // spacings:
-                            marginBlockEnd: negativePaddingBlock, // cancel out parent's padding with negative margin
-                        }),
-                    ]),
-                ]),
-            ]),
+                // spacings:
+                marginInline: negativePaddingInline,
+                marginBlockEnd: positivePaddingBlock,
+                ...rule(selectorIsFirstVisibleChild, {
+                    marginBlockStart: negativePaddingBlock, // cancel out parent's padding with negative margin
+                }),
+                ...rule(selectorIsLastVisibleChild, {
+                    marginBlockEnd: negativePaddingBlock, // cancel out parent's padding with negative margin
+                }),
+                // children:
+                // make sibling <media> closer (cancel out prev sibling's spacing):
+                ...nextSiblings(mediaSelector, {
+                    // spacings:
+                    marginBlockStart: negativePaddingBlock, // cancel out prev sibling's spacing with negative margin
+                }),
+            }),
         }),
-    ]);
+    });
 };
 export const usesContentChildrenMedia = (options = {}) => {
     // options:
     const { mediaSelector = mediaElm, } = options;
     const allMediaSelector = ([mediaSelector]
         .flat(Infinity)
-        .filter((m) => !!m));
+        .filter((m) => !!m) // filter out undefined|null|false|''
+    );
     const figureSelector = allMediaSelector.some((m) => (m === 'figure')) && 'figure';
-    const nonFigureSelector = allMediaSelector.filter((m) => !!m && (m !== 'figure'));
+    const nonFigureSelector = allMediaSelector.filter((m) => (m !== 'figure'));
     // dependencies:
     // borders:
     const [, , borderRadiusDecls] = usesBorderRadius();
-    return composition([
-        layout({
-            // children:
-            // first: reset top_level <figure>
-            ...children(figureSelector, [
-                imports([
-                    stripoutFigure(), // clear browser's default styling on figure
-                ]),
-                layout({
-                    // layouts:
-                    display: 'block', // fills the entire parent's width
-                }),
+    return style({
+        // children:
+        // first: reset top_level <figure>
+        ...children(figureSelector, {
+            ...imports([
+                stripoutFigure(), // clear browser's default styling on figure
             ]),
-            // then: styling top_level <figure>, top_level <media> & nested <media>:
-            ...children([
-                nonFigureSelector,
-                nonFigureSelector.map((m) => `figure>${m}`),
-            ], [
-                imports([
-                    stripoutImage(), // clear browser's default styling on image
-                ]),
-                layout({
-                    // layouts:
-                    display: 'block',
-                    // customize:
-                    ...usesGeneralProps(usesPrefixedProps(cssProps, 'media')), // apply general cssProps starting with img***
-                }),
+            ...style({
+                // layouts:
+                display: 'block', // fills the entire parent's width
+            }),
+        }),
+        // then: styling top_level <figure>, top_level <media> & nested <media>:
+        ...children([
+            nonFigureSelector,
+            nonFigureSelector.map((m) => `figure>${m}`),
+        ], {
+            ...imports([
+                stripoutImage(), // clear browser's default styling on image
             ]),
-            // finally: styling top_level <figure> & top_level <media> as separator:
-            ...children(allMediaSelector, [
-                layout({
-                    // borders:
-                    // let's Nodestrap system to manage borderStroke & borderRadius:
-                    ...expandBorderStroke(),
-                    ...expandBorderRadius(),
-                    // remove rounded corners on top:
-                    [borderRadiusDecls.borderStartStartRadius]: '0px',
-                    [borderRadiusDecls.borderStartEndRadius]: '0px',
-                    // remove rounded corners on bottom:
-                    [borderRadiusDecls.borderEndStartRadius]: '0px',
-                    [borderRadiusDecls.borderEndEndRadius]: '0px',
-                }),
-                imports([
-                    // borders:
-                    usesBorderAsSeparatorBlock({ itemsSelector: allMediaSelector }), // must be placed at the last
-                ]),
+            ...style({
+                // layouts:
+                display: 'block',
+                // customize:
+                ...usesGeneralProps(usesPrefixedProps(cssProps, 'media')), // apply general cssProps starting with img***
+            }),
+        }),
+        // finally: styling top_level <figure> & top_level <media> as separator:
+        ...children(allMediaSelector, {
+            ...style({
+                // borders:
+                // let's Nodestrap system to manage borderStroke & borderRadius:
+                ...expandBorderStroke(),
+                ...expandBorderRadius(),
+                // remove rounded corners on top:
+                [borderRadiusDecls.borderStartStartRadius]: '0px',
+                [borderRadiusDecls.borderStartEndRadius]: '0px',
+                // remove rounded corners on bottom:
+                [borderRadiusDecls.borderEndStartRadius]: '0px',
+                [borderRadiusDecls.borderEndEndRadius]: '0px',
+            }),
+            ...imports([
+                // borders:
+                usesBorderAsSeparatorBlock({ itemsSelector: allMediaSelector }), // must be placed at the last
             ]),
         }),
-    ]);
+    });
 };
 export const usesContentChildrenLinks = (options = {}) => {
     // options:
     const { linkSelector = linksElm, } = options;
-    return composition([
-        layout({
+    return style({
+        // children:
+        ...children(linkSelector, {
             // children:
-            ...children(linkSelector, [
-                layout({
-                    // children:
-                    // make a gap to sibling <a>:
-                    ...nextSiblings(linkSelector, [
-                        layout({
-                            // spacings:
-                            // add a space between links:
-                            marginInlineStart: cssProps.linkSpacing,
-                        }),
-                    ]),
-                    // customize:
-                    ...usesGeneralProps(usesPrefixedProps(cssProps, 'link')), // apply general cssProps starting with link***
-                }),
-            ]),
+            // make a gap to sibling <a>:
+            ...nextSiblings(linkSelector, {
+                // spacings:
+                // add a space between links:
+                marginInlineStart: cssProps.linkSpacing,
+            }),
+            // customize:
+            ...usesGeneralProps(usesPrefixedProps(cssProps, 'link')), // apply general cssProps starting with link***
         }),
-    ]);
+    });
 };
 export const usesContentChildren = (options = {}) => {
-    return composition([
-        imports([
+    return style({
+        ...imports([
             // media:
             usesContentChildrenMedia(options),
             // links:
@@ -182,64 +165,57 @@ export const usesContentChildren = (options = {}) => {
             // spacings:
             usesContentChildrenFill(options), // must be placed at the last
         ]),
-    ]);
+    });
 };
 export const usesContentBasicLayout = () => {
-    return composition([
-        layout({
-            // customize:
-            ...usesGeneralProps(cssProps),
-            // spacings:
-            ...expandPadding(cssProps), // expand padding css vars
-        }),
-    ]);
+    return style({
+        // customize:
+        ...usesGeneralProps(cssProps),
+        // spacings:
+        ...expandPadding(cssProps), // expand padding css vars
+    });
 };
 export const usesContentLayout = () => {
-    return composition([
-        imports([
+    return style({
+        ...imports([
             // layouts:
             usesBasicLayout(),
             usesContentBasicLayout(),
         ]),
-    ]);
+    });
 };
 export const usesContentBasicVariants = () => {
     // dependencies:
     // layouts:
-    const [sizes] = usesSizeVariant((sizeName) => composition([
-        layout({
-            // overwrites propName = propName{SizeName}:
-            ...overwriteProps(cssDecls, usesSuffixedProps(cssProps, sizeName)),
-        }),
-    ]));
-    return composition([
-        imports([
+    const [sizes] = usesSizeVariant((sizeName) => style({
+        // overwrites propName = propName{SizeName}:
+        ...overwriteProps(cssDecls, usesSuffixedProps(cssProps, sizeName)),
+    }));
+    return style({
+        ...imports([
             // layouts:
             sizes(),
         ]),
-    ]);
+    });
 };
 export const usesContentVariants = () => {
-    return composition([
-        imports([
+    return style({
+        ...imports([
             // variants:
             usesBasicVariants(),
-            // layouts:
             usesContentBasicVariants(),
         ]),
-    ]);
+    });
 };
 export const useContentSheet = createUseSheet(() => [
-    mainComposition([
-        imports([
-            // layouts:
-            usesContentLayout(),
-            // variants:
-            usesContentVariants(),
-            // children:
-            usesContentChildren(),
-        ]),
-    ]),
+    mainComposition(imports([
+        // layouts:
+        usesContentLayout(),
+        // variants:
+        usesContentVariants(),
+        // children:
+        usesContentChildren(),
+    ])),
 ], /*sheetId :*/ '2h0i4lc78z'); // an unique salt for SSR support, ensures the server-side & client-side have the same generated class names
 // configs:
 export const [cssProps, cssDecls, cssVals, cssConfig] = createCssConfig(() => {

@@ -4,17 +4,17 @@ import { BasicProps } from '@nodestrap/basic';
 export interface ContentChildrenOptions {
     mediaSelector?: SelectorCollection;
 }
-export declare const usesContentChildrenFill: (options?: ContentChildrenOptions) => import("@cssfn/cssfn").StyleCollection;
-export declare const usesContentChildrenMedia: (options?: ContentChildrenOptions) => import("@cssfn/cssfn").StyleCollection;
+export declare const usesContentChildrenFill: (options?: ContentChildrenOptions) => import("@cssfn/cssfn").Rule;
+export declare const usesContentChildrenMedia: (options?: ContentChildrenOptions) => import("@cssfn/cssfn").Rule;
 export interface ContentChildrenLinksOptions {
     linkSelector?: SelectorCollection;
 }
-export declare const usesContentChildrenLinks: (options?: ContentChildrenLinksOptions) => import("@cssfn/cssfn").StyleCollection;
-export declare const usesContentChildren: (options?: (ContentChildrenOptions & ContentChildrenLinksOptions)) => import("@cssfn/cssfn").StyleCollection;
-export declare const usesContentBasicLayout: () => import("@cssfn/cssfn").StyleCollection;
-export declare const usesContentLayout: () => import("@cssfn/cssfn").StyleCollection;
-export declare const usesContentBasicVariants: () => import("@cssfn/cssfn").StyleCollection;
-export declare const usesContentVariants: () => import("@cssfn/cssfn").StyleCollection;
+export declare const usesContentChildrenLinks: (options?: ContentChildrenLinksOptions) => import("@cssfn/cssfn").Rule;
+export declare const usesContentChildren: (options?: (ContentChildrenOptions & ContentChildrenLinksOptions)) => import("@cssfn/cssfn").Rule;
+export declare const usesContentBasicLayout: () => import("@cssfn/cssfn").Rule;
+export declare const usesContentLayout: () => import("@cssfn/cssfn").Rule;
+export declare const usesContentBasicVariants: () => import("@cssfn/cssfn").Rule;
+export declare const usesContentVariants: () => import("@cssfn/cssfn").Rule;
 export declare const useContentSheet: import("@cssfn/types").Factory<import("jss").Classes<"main">>;
 export declare const cssProps: import("@cssfn/css-config").Refs<{
     paddingInline: import("@cssfn/css-types").Cust.Ref;
