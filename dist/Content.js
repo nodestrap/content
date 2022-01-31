@@ -94,11 +94,21 @@ export const usesContentChildrenMedia = (options = {}) => {
         // first: reset top_level <figure>
         ...children(figureSelector, {
             ...imports([
-                stripoutFigure(), // clear browser's default styling on figure
+                stripoutFigure(),
+                // borders:
+                usesBorderAsContainer(), // make a nicely rounded corners
             ]),
             ...style({
                 // layouts:
-                display: 'block', // fills the entire parent's width
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'start',
+                alignItems: 'stretch',
+                flexWrap: 'nowrap',
+                // children:
+                ...children('*', {
+                    ...expandBorderRadius(), // expand borderRadius css vars
+                }),
             }),
         }),
         // then: styling top_level <figure>, top_level <media> & nested <media>:
