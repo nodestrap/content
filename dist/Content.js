@@ -116,15 +116,17 @@ export const usesContentChildrenMedia = (options = {}) => {
             nonFigureSelector,
             nonFigureSelector.map((m) => `figure>${m}`),
         ], {
-            ...imports([
-                stripoutImage(), // clear browser's default styling on image
-            ]),
-            ...style({
-                // layouts:
-                display: 'block',
-                // customize:
-                ...usesGeneralProps(usesPrefixedProps(cssProps, 'media')), // apply general cssProps starting with img***
+            // layouts:
+            ...rule(':not(.media)', {
+                ...imports([
+                    stripoutImage(), // clear browser's default styling on image
+                ]),
+                ...style({
+                    display: 'block', // fills the entire parent's width
+                }),
             }),
+            // customize:
+            ...usesGeneralProps(usesPrefixedProps(cssProps, 'media')), // apply general cssProps starting with img***
         }),
         // finally: styling top_level <figure> & top_level <media> as separator:
         ...children(allMediaSelector, {

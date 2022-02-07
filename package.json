@@ -1,6 +1,6 @@
 {
   "name": "@nodestrap/content",
-  "version": "4.0.10",
+  "version": "4.0.11",
   "description": "A generic element for displaying contents such as paragraphs, images, videos, etc.",
   "type": "module",
   "main": "dist/Content.js",
@@ -34,10 +34,10 @@
     "@cssfn/cssfn": "^1.0.11",
     "@cssfn/react-cssfn": "^1.0.11",
     "@nodestrap/basic": "^4.0.7",
-    "@nodestrap/container": "^4.0.14",
+    "@nodestrap/container": "^4.0.15",
     "@nodestrap/spacers": "^4.0.2",
     "@nodestrap/stripouts": "^4.0.2",
-    "@types/react": "^17.0.38",
+    "@types/react": "^17.0.39",
     "react": "^17.0.2"
   }
 }
