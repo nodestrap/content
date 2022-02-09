@@ -16,6 +16,15 @@ createUseSheet, } from '@cssfn/react-cssfn'; // cssfn for react
 import { createCssConfig, 
 // utilities:
 usesGeneralProps, usesPrefixedProps, usesSuffixedProps, overwriteProps, } from '@cssfn/css-config'; // Stores & retrieves configuration using *css custom properties* (css variables)
+import { 
+// parses:
+parseSelectors, 
+// creates & tests:
+createPseudoClassSelector, isElementSelectorOf, createSelector, createSelectorList, isNotEmptySelectors, 
+// renders:
+selectorToString, 
+// transforms:
+groupSelectors, groupSelector, } from '@cssfn/css-selector';
 // nodestrap utilities:
 import spacers from '@nodestrap/spacers'; // configurable spaces defs
 import { stripoutFigure, stripoutImage, } from '@nodestrap/stripouts';
@@ -30,12 +39,31 @@ import {
 selectorIsFirstVisibleChild, selectorIsLastVisibleChild, 
 // hooks:
 usesContainer, usesBorderAsContainer, usesBorderAsSeparatorBlock, } from '@nodestrap/container';
+import Button from '@nodestrap/button';
 // styles:
-const mediaElm = ['figure', 'img', 'svg', 'video', '.media'];
+const mediaElm = ['figure', 'img', 'svg', 'video', 'picture', 'embed', 'object', '.media'];
+const notMediaElm = '.not-media';
 const linksElm = ['a', '.link'];
+const notLinksElm = '.not-link';
+export const usesContentChildrenOptions = (options = {}) => {
+    // options:
+    const { mediaSelector: mediaSelectorStr = mediaElm, notMediaSelector: notMediaSelectorStr = notMediaElm, } = options;
+    const mediaSelector = parseSelectors(mediaSelectorStr);
+    const notMediaSelector = parseSelectors(notMediaSelectorStr);
+    const notNotMediaSelector = notMediaSelector && createPseudoClassSelector(// create pseudo_class `:not()`
+    'not', groupSelectors(notMediaSelector, { selectorName: 'where' }));
+    const mediaSelectorWithExcept = mediaSelector && (groupSelectors(mediaSelector, { selectorName: 'where' }) // group multiple selectors with `:where()`, to suppress the specificity weight
+        .map((mediaSelectorGroup) => createSelector(...mediaSelectorGroup, notNotMediaSelector))
+        .map((selector) => selectorToString(selector)));
+    return {
+        mediaSelectorWithExcept,
+        mediaSelector,
+        notNotMediaSelector,
+    };
+};
 export const usesContentChildrenFill = (options = {}) => {
     // options:
-    const { mediaSelector = mediaElm, } = options;
+    const { mediaSelectorWithExcept } = usesContentChildrenOptions(options);
     // dependencies:
     // spacings:
     const [, containerRefs] = usesContainer();
@@ -46,11 +74,11 @@ export const usesContentChildrenFill = (options = {}) => {
     return style({
         ...imports([
             // borders:
-            usesBorderAsContainer({ itemsSelector: mediaSelector }), // make a nicely rounded corners
+            usesBorderAsContainer({ itemsSelector: mediaSelectorWithExcept }), // make a nicely rounded corners
         ]),
         ...style({
             // children:
-            ...children(mediaSelector, {
+            ...children(mediaSelectorWithExcept, {
                 // sizes:
                 // span to maximum width including parent's paddings:
                 boxSizing: 'border-box',
@@ -69,7 +97,7 @@ export const usesContentChildrenFill = (options = {}) => {
                 }),
                 // children:
                 // make sibling <media> closer (cancel out prev sibling's spacing):
-                ...nextSiblings(mediaSelector, {
+                ...nextSiblings(mediaSelectorWithExcept, {
                     // spacings:
                     marginBlockStart: negativePaddingBlock, // cancel out prev sibling's spacing with negative margin
                 }),
@@ -79,20 +107,28 @@ export const usesContentChildrenFill = (options = {}) => {
 };
 export const usesContentChildrenMedia = (options = {}) => {
     // options:
-    const { mediaSelector = mediaElm, } = options;
-    const allMediaSelector = ([mediaSelector]
-        .flat(Infinity)
-        .filter((m) => !!m) // filter out undefined|null|false|''
-    );
-    const figureSelector = allMediaSelector.some((m) => (m === 'figure')) && 'figure';
-    const nonFigureSelector = allMediaSelector.filter((m) => (m !== 'figure'));
+    const { mediaSelectorWithExcept, mediaSelector, notNotMediaSelector } = usesContentChildrenOptions(options);
+    const figureSelector = mediaSelector && mediaSelector.find((m) => m && m.some((e) => isElementSelectorOf(e, 'figure')));
+    const nonFigureSelector = mediaSelector && mediaSelector.filter((m) => !m || m.every((e) => !isElementSelectorOf(e, 'figure')));
+    const figureSelectorWithExceptMod = figureSelector && (groupSelector(figureSelector, { selectorName: 'where' }) // group multiple selectors with `:where()`, to suppress the specificity weight
+        .map((figureSelectorGroup) => createSelector(...figureSelectorGroup, notNotMediaSelector)));
+    const figureSelectorWithExcept = figureSelectorWithExceptMod && (figureSelectorWithExceptMod
+        .map((selector) => selectorToString(selector)));
+    const figureSelectorWithCombinator = figureSelectorWithExceptMod && (figureSelectorWithExceptMod
+        .map((figureSelectorGroup) => createSelector(...figureSelectorGroup, '>')));
+    const nonFigureSelectorWithExcept = nonFigureSelector && (groupSelectors(nonFigureSelector, { selectorName: 'where' }) // group multiple selectors with `:where()`, to suppress the specificity weight
+        .flatMap((nonFigureSelectorGroup) => {
+        const nonFigureSelectorWithExcept = createSelector(...nonFigureSelectorGroup, notNotMediaSelector);
+        return createSelectorList(nonFigureSelectorWithExcept, ...(!isNotEmptySelectors(figureSelectorWithCombinator) ? [] : figureSelectorWithCombinator.map((selectorCombi) => createSelector(...selectorCombi, ...nonFigureSelectorWithExcept))));
+    })
+        .map((selector) => selectorToString(selector)));
     // dependencies:
     // borders:
     const [, , borderRadiusDecls] = usesBorderRadius();
     return style({
         // children:
         // first: reset top_level <figure>
-        ...children(figureSelector, {
+        ...children(figureSelectorWithExcept, {
             ...imports([
                 stripoutFigure(),
                 // borders:
@@ -112,10 +148,7 @@ export const usesContentChildrenMedia = (options = {}) => {
             }),
         }),
         // then: styling top_level <figure>, top_level <media> & nested <media>:
-        ...children([
-            nonFigureSelector,
-            nonFigureSelector.map((m) => `figure>${m}`),
-        ], {
+        ...children(nonFigureSelectorWithExcept, {
             // layouts:
             ...rule(':not(.media)', {
                 ...imports([
@@ -129,7 +162,7 @@ export const usesContentChildrenMedia = (options = {}) => {
             ...usesGeneralProps(usesPrefixedProps(cssProps, 'media')), // apply general cssProps starting with img***
         }),
         // finally: styling top_level <figure> & top_level <media> as separator:
-        ...children(allMediaSelector, {
+        ...children(mediaSelectorWithExcept, {
             ...style({
                 // borders:
                 // let's Nodestrap system to manage borderStroke & borderRadius:
@@ -144,20 +177,36 @@ export const usesContentChildrenMedia = (options = {}) => {
             }),
             ...imports([
                 // borders:
-                usesBorderAsSeparatorBlock({ itemsSelector: allMediaSelector }), // must be placed at the last
+                usesBorderAsSeparatorBlock({ itemsSelector: mediaSelectorWithExcept }), // must be placed at the last
             ]),
         }),
     });
 };
+export const usesContentChildrenLinksOptions = (options = {}) => {
+    // options:
+    const { linkSelector: linkSelectorStr = linksElm, notLinkSelector: notLinkSelectorStr = notLinksElm, } = options;
+    const linkSelector = parseSelectors(linkSelectorStr);
+    const notLinkSelector = parseSelectors(notLinkSelectorStr);
+    const notNotLinkSelector = notLinkSelector && createPseudoClassSelector(// create pseudo_class `:not()`
+    'not', groupSelectors(notLinkSelector, { selectorName: 'where' }));
+    const linkSelectorWithExcept = linkSelector && (groupSelectors(linkSelector, { selectorName: 'where' }) // group multiple selectors with `:where()`, to suppress the specificity weight
+        .map((linkSelectorGroup) => createSelector(...linkSelectorGroup, notNotLinkSelector))
+        .map((selector) => selectorToString(selector)));
+    return {
+        linkSelectorWithExcept,
+        linkSelector,
+        notNotLinkSelector,
+    };
+};
 export const usesContentChildrenLinks = (options = {}) => {
     // options:
-    const { linkSelector = linksElm, } = options;
+    const { linkSelectorWithExcept } = usesContentChildrenLinksOptions(options);
     return style({
         // children:
-        ...children(linkSelector, {
+        ...children(linkSelectorWithExcept, {
             // children:
             // make a gap to sibling <a>:
-            ...nextSiblings(linkSelector, {
+            ...nextSiblings(linkSelectorWithExcept, {
                 // spacings:
                 // add a space between links:
                 marginInlineStart: cssProps.linkSpacing,
@@ -247,12 +296,34 @@ export const [cssProps, cssDecls, cssVals, cssConfig] = createCssConfig(() => {
 export function Content(props) {
     // styles:
     const sheet = useContentSheet();
+    // rest props:
+    const { 
+    // children:
+    children, ...restProps } = props;
     // jsx:
-    return (React.createElement(Basic, { ...props, 
+    return (React.createElement(Basic, { ...restProps, 
         // variants:
         mild: props.mild ?? true, 
         // classes:
-        mainClass: props.mainClass ?? sheet.main }));
+        mainClass: props.mainClass ?? sheet.main }, React.Children.map(children, (child) => {
+        // link:
+        if (React.isValidElement(child)
+            &&
+                (child.type === 'a')
+            &&
+                !(child.props.className ?? '').split(' ').some((className) => (className === 'not-link'))) {
+            // rest props:
+            const { type, // discard
+            ...btnProps } = child.props;
+            return (React.createElement(Button
+            // variants:
+            , { 
+                // variants:
+                btnStyle: 'link', ...btnProps }));
+        } // if
+        // other component:
+        return child;
+    })));
 }
 export { Content as default };
 export function Article(props) { return React.createElement(Content, { ...props, semanticTag: 'article', semanticRole: 'article' }); }

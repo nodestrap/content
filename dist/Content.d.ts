@@ -3,12 +3,24 @@ import { SelectorCollection } from '@cssfn/cssfn';
 import { BasicProps } from '@nodestrap/basic';
 export interface ContentChildrenOptions {
     mediaSelector?: SelectorCollection;
+    notMediaSelector?: SelectorCollection;
 }
+export declare const usesContentChildrenOptions: (options?: ContentChildrenOptions) => {
+    mediaSelectorWithExcept: SelectorCollection;
+    mediaSelector: import("@cssfn/css-selector").SelectorList | null;
+    notNotMediaSelector: import("@cssfn/css-selector").PseudoClassSelector | null;
+};
 export declare const usesContentChildrenFill: (options?: ContentChildrenOptions) => import("@cssfn/cssfn").Rule;
 export declare const usesContentChildrenMedia: (options?: ContentChildrenOptions) => import("@cssfn/cssfn").Rule;
 export interface ContentChildrenLinksOptions {
     linkSelector?: SelectorCollection;
+    notLinkSelector?: SelectorCollection;
 }
+export declare const usesContentChildrenLinksOptions: (options?: ContentChildrenLinksOptions) => {
+    linkSelectorWithExcept: SelectorCollection;
+    linkSelector: import("@cssfn/css-selector").SelectorList | null;
+    notNotLinkSelector: import("@cssfn/css-selector").PseudoClassSelector | null;
+};
 export declare const usesContentChildrenLinks: (options?: ContentChildrenLinksOptions) => import("@cssfn/cssfn").Rule;
 export declare const usesContentChildren: (options?: (ContentChildrenOptions & ContentChildrenLinksOptions)) => import("@cssfn/cssfn").Rule;
 export declare const usesContentBasicLayout: () => import("@cssfn/cssfn").Rule;
