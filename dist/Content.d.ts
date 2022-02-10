@@ -7,6 +7,7 @@ export interface ContentChildrenOptions {
 }
 export declare const usesContentChildrenOptions: (options?: ContentChildrenOptions) => {
     mediaSelectorWithExcept: SelectorCollection;
+    mediaSelectorWithExceptZero: SelectorCollection;
     mediaSelector: import("@cssfn/css-selector").SelectorList | null;
     notNotMediaSelector: import("@cssfn/css-selector").PseudoClassSelector | null;
 };
@@ -18,6 +19,7 @@ export interface ContentChildrenLinksOptions {
 }
 export declare const usesContentChildrenLinksOptions: (options?: ContentChildrenLinksOptions) => {
     linkSelectorWithExcept: SelectorCollection;
+    linkSelectorWithExceptZero: SelectorCollection;
     linkSelector: import("@cssfn/css-selector").SelectorList | null;
     notNotLinkSelector: import("@cssfn/css-selector").PseudoClassSelector | null;
 };

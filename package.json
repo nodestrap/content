@@ -1,6 +1,6 @@
 {
   "name": "@nodestrap/content",
-  "version": "4.0.12",
+  "version": "4.0.13",
   "description": "A generic element for displaying contents such as paragraphs, images, videos, etc.",
   "type": "module",
   "main": "dist/Content.js",
@@ -34,6 +34,7 @@
     "@cssfn/css-selector": "^1.0.5",
     "@cssfn/cssfn": "^1.0.12",
     "@cssfn/react-cssfn": "^1.0.11",
+    "@cssfn/types": "^1.0.4",
     "@nodestrap/basic": "^4.0.7",
     "@nodestrap/button": "^4.0.6",
     "@nodestrap/container": "^4.0.15",

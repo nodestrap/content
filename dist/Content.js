@@ -1,6 +1,5 @@
 // react:
 import { default as React, } from 'react'; // base technology of our nodestrap components
-// cssfn:
 import { 
 // compositions:
 mainComposition, 
@@ -20,7 +19,7 @@ import {
 // parses:
 parseSelectors, 
 // creates & tests:
-createPseudoClassSelector, isElementSelectorOf, createSelector, createSelectorList, isNotEmptySelectors, 
+createElementSelector, createPseudoClassSelector, isElementSelectorOf, createSelector, createSelectorList, isNotEmptySelectors, 
 // renders:
 selectorToString, 
 // transforms:
@@ -40,6 +39,19 @@ selectorIsFirstVisibleChild, selectorIsLastVisibleChild,
 // hooks:
 usesContainer, usesBorderAsContainer, usesBorderAsSeparatorBlock, } from '@nodestrap/container';
 import Button from '@nodestrap/button';
+// utilities:
+const toSelectors = (selectorList) => selectorList && selectorList.map(selectorToString);
+const childSelector = createSelector(// the specificity weight including parent = 2.1 , is enough to overcome specificity `.FooMedia.FooVariant`
+// specificity weight = 1
+createPseudoClassSelector('nth-child', 'n'), // :nth-child(n)
+// specificity weight = 0.1
+createPseudoClassSelector(// :not(_)
+'not', createSelectorList(createSelector(createElementSelector('_')))));
+const setChildSpecificity = (selectorList) => {
+    return selectorList && (selectorList
+        .map((selector) => createSelector(// the specificity weight including parent = 2.1 , is enough to overcome specificity `.FooMedia.FooVariant`
+    ...selector, ...childSelector)));
+};
 // styles:
 const mediaElm = ['figure', 'img', 'svg', 'video', 'picture', 'embed', 'object', '.media'];
 const notMediaElm = '.not-media';
@@ -52,18 +64,18 @@ export const usesContentChildrenOptions = (options = {}) => {
     const notMediaSelector = parseSelectors(notMediaSelectorStr);
     const notNotMediaSelector = notMediaSelector && createPseudoClassSelector(// create pseudo_class `:not()`
     'not', groupSelectors(notMediaSelector, { selectorName: 'where' }));
-    const mediaSelectorWithExcept = mediaSelector && (groupSelectors(mediaSelector, { selectorName: 'where' }) // group multiple selectors with `:where()`, to suppress the specificity weight
-        .map((mediaSelectorGroup) => createSelector(...mediaSelectorGroup, notNotMediaSelector))
-        .map((selector) => selectorToString(selector)));
+    const mediaSelectorWithExceptZero = mediaSelector && (groupSelectors(mediaSelector, { selectorName: 'where' }) // group multiple selectors with `:where()`, to suppress the specificity weight
+        .map((mediaSelectorGroup) => createSelector(...mediaSelectorGroup, notNotMediaSelector)));
     return {
-        mediaSelectorWithExcept,
+        mediaSelectorWithExcept: toSelectors(setChildSpecificity(mediaSelectorWithExceptZero)),
+        mediaSelectorWithExceptZero: toSelectors(mediaSelectorWithExceptZero),
         mediaSelector,
         notNotMediaSelector,
     };
 };
 export const usesContentChildrenFill = (options = {}) => {
     // options:
-    const { mediaSelectorWithExcept } = usesContentChildrenOptions(options);
+    const { mediaSelectorWithExcept, mediaSelectorWithExceptZero, } = usesContentChildrenOptions(options);
     // dependencies:
     // spacings:
     const [, containerRefs] = usesContainer();
@@ -97,7 +109,7 @@ export const usesContentChildrenFill = (options = {}) => {
                 }),
                 // children:
                 // make sibling <media> closer (cancel out prev sibling's spacing):
-                ...nextSiblings(mediaSelectorWithExcept, {
+                ...nextSiblings(mediaSelectorWithExceptZero, {
                     // spacings:
                     marginBlockStart: negativePaddingBlock, // cancel out prev sibling's spacing with negative margin
                 }),
@@ -107,21 +119,19 @@ export const usesContentChildrenFill = (options = {}) => {
 };
 export const usesContentChildrenMedia = (options = {}) => {
     // options:
-    const { mediaSelectorWithExcept, mediaSelector, notNotMediaSelector } = usesContentChildrenOptions(options);
+    const { mediaSelectorWithExcept, mediaSelectorWithExceptZero, mediaSelector, notNotMediaSelector, } = usesContentChildrenOptions(options);
     const figureSelector = mediaSelector && mediaSelector.find((m) => m && m.some((e) => isElementSelectorOf(e, 'figure')));
     const nonFigureSelector = mediaSelector && mediaSelector.filter((m) => !m || m.every((e) => !isElementSelectorOf(e, 'figure')));
     const figureSelectorWithExceptMod = figureSelector && (groupSelector(figureSelector, { selectorName: 'where' }) // group multiple selectors with `:where()`, to suppress the specificity weight
         .map((figureSelectorGroup) => createSelector(...figureSelectorGroup, notNotMediaSelector)));
-    const figureSelectorWithExcept = figureSelectorWithExceptMod && (figureSelectorWithExceptMod
-        .map((selector) => selectorToString(selector)));
+    const figureSelectorWithExcept = toSelectors(setChildSpecificity(figureSelectorWithExceptMod));
     const figureSelectorWithCombinator = figureSelectorWithExceptMod && (figureSelectorWithExceptMod
         .map((figureSelectorGroup) => createSelector(...figureSelectorGroup, '>')));
-    const nonFigureSelectorWithExcept = nonFigureSelector && (groupSelectors(nonFigureSelector, { selectorName: 'where' }) // group multiple selectors with `:where()`, to suppress the specificity weight
+    const nonFigureSelectorWithExcept = toSelectors(setChildSpecificity(nonFigureSelector && (groupSelectors(nonFigureSelector, { selectorName: 'where' }) // group multiple selectors with `:where()`, to suppress the specificity weight
         .flatMap((nonFigureSelectorGroup) => {
         const nonFigureSelectorWithExcept = createSelector(...nonFigureSelectorGroup, notNotMediaSelector);
         return createSelectorList(nonFigureSelectorWithExcept, ...(!isNotEmptySelectors(figureSelectorWithCombinator) ? [] : figureSelectorWithCombinator.map((selectorCombi) => createSelector(...selectorCombi, ...nonFigureSelectorWithExcept))));
-    })
-        .map((selector) => selectorToString(selector)));
+    }))));
     // dependencies:
     // borders:
     const [, , borderRadiusDecls] = usesBorderRadius();
@@ -177,7 +187,7 @@ export const usesContentChildrenMedia = (options = {}) => {
             }),
             ...imports([
                 // borders:
-                usesBorderAsSeparatorBlock({ itemsSelector: mediaSelectorWithExcept }), // must be placed at the last
+                usesBorderAsSeparatorBlock({ itemsSelector: mediaSelectorWithExceptZero }), // must be placed at the last
             ]),
         }),
     });
@@ -189,24 +199,24 @@ export const usesContentChildrenLinksOptions = (options = {}) => {
     const notLinkSelector = parseSelectors(notLinkSelectorStr);
     const notNotLinkSelector = notLinkSelector && createPseudoClassSelector(// create pseudo_class `:not()`
     'not', groupSelectors(notLinkSelector, { selectorName: 'where' }));
-    const linkSelectorWithExcept = linkSelector && (groupSelectors(linkSelector, { selectorName: 'where' }) // group multiple selectors with `:where()`, to suppress the specificity weight
-        .map((linkSelectorGroup) => createSelector(...linkSelectorGroup, notNotLinkSelector))
-        .map((selector) => selectorToString(selector)));
+    const linkSelectorWithExceptZero = linkSelector && (groupSelectors(linkSelector, { selectorName: 'where' }) // group multiple selectors with `:where()`, to suppress the specificity weight
+        .map((linkSelectorGroup) => createSelector(...linkSelectorGroup, notNotLinkSelector)));
     return {
-        linkSelectorWithExcept,
+        linkSelectorWithExcept: toSelectors(setChildSpecificity(linkSelectorWithExceptZero)),
+        linkSelectorWithExceptZero: toSelectors(linkSelectorWithExceptZero),
         linkSelector,
         notNotLinkSelector,
     };
 };
 export const usesContentChildrenLinks = (options = {}) => {
     // options:
-    const { linkSelectorWithExcept } = usesContentChildrenLinksOptions(options);
+    const { linkSelectorWithExcept, linkSelectorWithExceptZero, } = usesContentChildrenLinksOptions(options);
     return style({
         // children:
         ...children(linkSelectorWithExcept, {
             // children:
             // make a gap to sibling <a>:
-            ...nextSiblings(linkSelectorWithExcept, {
+            ...nextSiblings(linkSelectorWithExceptZero, {
                 // spacings:
                 // add a space between links:
                 marginInlineStart: cssProps.linkSpacing,
@@ -309,15 +319,21 @@ export function Content(props) {
         // link:
         if (React.isValidElement(child)
             &&
-                (child.type === 'a')
+                ((child.type === 'a')
+                    ||
+                        ((typeof (child.type) === 'string')
+                            &&
+                                (child.props.className ?? '').split(' ').some((className) => (className === 'link'))))
             &&
                 !(child.props.className ?? '').split(' ').some((className) => (className === 'not-link'))) {
             // rest props:
             const { type, // discard
             ...btnProps } = child.props;
             return (React.createElement(Button
-            // variants:
+            // semantics:
             , { 
+                // semantics:
+                tag: (child.type ?? 'a'), 
                 // variants:
                 btnStyle: 'link', ...btnProps }));
         } // if
