@@ -160,7 +160,7 @@ export const usesContentChildrenMedia = (options = {}) => {
         // then: styling top_level <figure>, top_level <media> & nested <media>:
         ...children(nonFigureSelectorWithExcept, {
             // layouts:
-            ...rule(':not(.media)', {
+            ...rule(':where(:not(.media))', {
                 ...imports([
                     stripoutImage(), // clear browser's default styling on image
                 ]),

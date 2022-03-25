@@ -1,6 +1,6 @@
 {
   "name": "@nodestrap/content",
-  "version": "4.0.13",
+  "version": "4.0.14",
   "description": "A generic element for displaying contents such as paragraphs, images, videos, etc.",
   "type": "module",
   "main": "dist/Content.js",
@@ -30,17 +30,17 @@
   },
   "homepage": "https://github.com/nodestrap/content#readme",
   "dependencies": {
-    "@cssfn/css-config": "^1.0.4",
-    "@cssfn/css-selector": "^1.0.5",
+    "@cssfn/css-config": "^1.0.8",
+    "@cssfn/css-selector": "^1.0.6",
     "@cssfn/cssfn": "^1.0.12",
     "@cssfn/react-cssfn": "^1.0.11",
     "@cssfn/types": "^1.0.4",
     "@nodestrap/basic": "^4.0.7",
-    "@nodestrap/button": "^4.0.6",
+    "@nodestrap/button": "^4.0.9",
     "@nodestrap/container": "^4.0.15",
     "@nodestrap/spacers": "^4.0.2",
     "@nodestrap/stripouts": "^4.0.2",
-    "@types/react": "^17.0.39",
+    "@types/react": "^17.0.43",
     "react": "^17.0.2"
   }
 }
